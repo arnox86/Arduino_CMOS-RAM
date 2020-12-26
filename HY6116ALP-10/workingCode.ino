@@ -109,19 +109,10 @@ void writeToRAM (uint16_t _adress, char _data) {
     
   }
   
-  delayMicroseconds (1);    // Reaction time of RAM
+  delayMicroseconds (0.1);    // Reaction time of RAM
   
   digitalWrite (WE, HIGH);    // Resetting WE
   
-  
-  
-  // Setting all adress pins to low:
-  
-  for (int ast_cnt = 0; ast_cnt < 11; ast_cnt++) {
-    
-    digitalWrite (adress_bit[ast_cnt], LOW);
-    
-  }
     
   // Setting all data pins to low:
   
@@ -131,8 +122,75 @@ void writeToRAM (uint16_t _adress, char _data) {
     
   }
   
-  
+  delayMicroseconds (0.1);
     
+}
+
+//----------------------------------------------------------------------
+
+// Function for reading one byte of data at specific adress:
+
+char readFromRAM (uint16_t _adress) {
+  
+  byte __output_char = 0;
+  
+  uint16_t _b_adress = _adress;
+  
+  _b_adress &= 0xF800;    // Setting lower 10 bits zero, checking if adress is valid
+   
+  if (_b_adress > 0) {
+    
+    Serial.print ("Error: adress is invalid (too long): 0x");
+    Serial.print (_adress, HEX);
+    Serial.println ("  ::reading progress interrupted");
+    
+    return (0xFFFF);
+    
+  }
+  _b_adress = _adress;
+  
+  
+  // Set data pins to input:
+  
+  for (int dis_cnt = 0; dis_cnt < 8; dis_cnt++) {
+    
+    pinMode (io_bit[dis_cnt+1], INPUT);
+    digitalWrite (io_bit[dis_cnt+1], LOW);
+    
+  }
+  
+  
+  // Set Adress (same way as in write process):
+  
+  for (int adr_cnt = 0; adr_cnt < 11; adr_cnt++) {
+    
+    digitalWrite (adress_bit[adr_cnt], _b_adress & 0x1);  // Anding adress with 1, to get value of the lowest bit
+    
+    _b_adress = _b_adress >> 1;    // Shifting adress buffer right by one
+    
+  }
+  
+  digitalWrite (OE, LOW);    // Enabling output
+  
+  delayMicroseconds (1);
+  
+  // Reading data pins:
+  
+  boolean __bbuffer;
+  byte __andbuffer;
+  
+  for (int rcy_cnt = 0; rcy_cnt < 8; rcy_cnt++) {
+    
+    __bbuffer = digitalRead (io_bit[rcy_cnt+1]);    // Reading single pins
+    
+    if (__bbuffer == 1) bitSet (__andbuffer, rcy_cnt);  // Setting bits in buffer var
+    __output_char += __andbuffer;    // Adding each value to the output variable
+    __andbuffer = 0;
+    
+  }
+
+  return (__output_char);
+  
 }
 
 
@@ -159,8 +217,11 @@ void setup () {
 
 
 void loop () {
- 
-  writeToRAM (0x07FE, 'c');
+  int b = 0x0001;
+  writeToRAM (b, 'f');
+  
+  char a = readFromRAM (0x0001);
+  Serial.println (a);
   
   delay (100000);
   exit (0);
