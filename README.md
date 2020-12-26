@@ -1,8 +1,7 @@
 # Arduino_RAM-library
 
-Code and library for using Hyundai HY 6116ALP-10 and other 2048 x 8 Bit RAM chips.
+Code and library for using Hyundai HY 6116ALP-10 and other 2048 x 8 Bit RAM chips with:
 
-Needed:
 - 11 adress pins
 - 8 data pins
 - output enable / write enable pins
