@@ -45,6 +45,9 @@ int *p_io = io_bit;
 #define OE 38    // Output Enable / Write Enable
 #define WE 36
 
+#define maxSize 0x07FF    // Maximum Size of memory
+#define maxSizeInv 0xFFF-maxSize
+
 
 uint16_t adress_counter;    // Counts current adress
 uint16_t adress_buffer;     // Saves specific adresses
@@ -54,7 +57,7 @@ uint16_t adress_buffer;     // Saves specific adresses
 
 // Function for writing single 8-bit character to specific adress
 
-void writeToRAM (uint16_t _adress, char _data) {
+void writeByteToRAM (uint16_t _adress, char _data) {
   
   uint16_t _b_adress = _adress;
   
@@ -121,16 +124,14 @@ void writeToRAM (uint16_t _adress, char _data) {
     digitalWrite (io_bit[dst_cnt+1], LOW);
     
   }
-  
-  delayMicroseconds (0.1);
     
 }
 
 //----------------------------------------------------------------------
 
-// Function for reading one byte of data at specific adress:
+// Function for reading single byte of data at specific adress:
 
-char readFromRAM (uint16_t _adress) {
+char readByteFromRAM (uint16_t _adress) {
   
   byte __output_char = 0;
   
@@ -193,6 +194,86 @@ char readFromRAM (uint16_t _adress) {
   
 }
 
+//----------------------------------------------------------------------
+
+// Function for entering start adress, if nothing was entered, it start's at 0 or
+//  the last end adress:
+
+uint16_t _startAdress;
+
+void setStartAdress (uint16_t _adress) {
+  
+  uint16_t _b_adress = _adress;
+  
+  _b_adress &= 0xF800;    // Setting lower 10 bits zero, checking if adress is valid
+   
+  if (_b_adress > 0) {
+    
+    Serial.print ("Error: adress is invalid (too long): 0x");
+    Serial.print (_adress, HEX);
+    Serial.println ("  ::writing(movs) progress interrupted");
+    
+    return;
+    
+  }
+  
+  _startAdress = _adress;
+  
+}
+
+//----------------------------------------------------------------------
+
+// Function to write more than one byte to the RAM. The start adress has to be entered,
+//  than its always added by 1. A char array has to be entered. Returnd you get the
+//  las written adress+1:
+
+int writeArrayToRAM (char _data[]) {
+  
+  size_t __array_size = sizeof (_data);    // Getting size of the array for loop
+  uint16_t __current_adress = _startAdress;
+  uint16_t __data_counter = 0;
+  
+  for ( ;__data_counter < __array_size;) {    // For size of array
+  
+    uint16_t _b_adress = __current_adress;
+  
+    _b_adress &= 0xF800;    // Setting lower 10 bits zero, checking if adress is valid
+   
+    if (_b_adress > 0) {
+    
+      Serial.print ("Error: adress is invalid (too long): 0x");
+      Serial.print (__current_adress, HEX);
+      Serial.println ("  ::array writing(movs) progress interrupted");
+    
+      return (0xFFFF);
+    
+    }
+  
+    writeByteToRAM (_startAdress, _data[__data_counter]);
+  
+    __current_adress++;    // increment adress
+    __data_counter++;
+  
+    if (_startAdress > 0x07FF) {
+    
+      Serial.print ("Warning: last adress was filled: 0x");
+      Serial.print (__current_adress-1, HEX);
+      Serial.println ("  ::array writing(movs) will be interrupted");
+    
+    }
+    
+  }
+  
+  return (_startAdress);
+  
+}
+
+//----------------------------------------------------------------------
+
+// Function to read larger parts of the 
+
+//int readArrayFromRAM (char _data
+
 
 //----------------------------------------------------------------------
 
@@ -217,13 +298,11 @@ void setup () {
 
 
 void loop () {
-  int b = 0x0001;
-  writeToRAM (b, 'f');
   
-  char a = readFromRAM (0x0001);
-  Serial.println (a);
   
-  delay (100000);
+    
+  
+  delay (0.0001);
   exit (0);
   
 }
