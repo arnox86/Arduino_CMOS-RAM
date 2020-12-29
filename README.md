@@ -1,4 +1,4 @@
-# Arduino_RAM-library
+# Arduino_CMOS-library
 
 Code and library for using Hyundai HY 6116ALP-10 CMOS-RAM-chip and other 2048 x 8 Bit (or less) RAM chips with:
 
