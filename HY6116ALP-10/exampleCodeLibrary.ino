@@ -53,4 +53,3 @@ SOFTWARE.
 #define WE 36
 
 #define maxSize 0x07FF    // Maximum Size of memory (example pins)
-#define maxSizeInv 0xFFFF-maxSize
