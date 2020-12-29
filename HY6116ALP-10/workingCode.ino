@@ -1,8 +1,35 @@
+/*
+MIT License
+
+Copyright (c) 2020 Benedikt Bursian
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
 
 /*
 *
-*    Communicating with a CMOS-RAM, 2048 x 8 bits (Hyundai HY6116A) including
-*    read-, search- and write-cycles.
+*    Communicating with a CMOS-RAM, 2048 x 8 bits (Hyundai HY6116A or other with same or less bytes) including
+*    read- and write- function.
+*
+*    Adress an data pins are examples for Arduino Mega2560 R3 and have to be changed manually.
 *
 */
 
@@ -46,7 +73,7 @@ int *p_io = io_bit;
 #define WE 36
 
 #define maxSize 0x07FF    // Maximum Size of memory
-#define maxSizeInv 0xFFF-maxSize
+#define maxSizeInv 0xFFFF-maxSize
 
 
 uint16_t adress_counter;    // Counts current adress
@@ -112,7 +139,6 @@ void writeByteToRAM (uint16_t _adress, char _data) {
     
   }
   
-  delayMicroseconds (0.1);    // Reaction time of RAM
   
   digitalWrite (WE, HIGH);    // Resetting WE
   
@@ -124,6 +150,8 @@ void writeByteToRAM (uint16_t _adress, char _data) {
     digitalWrite (io_bit[dst_cnt+1], LOW);
     
   }
+  
+  delayMicroseconds (2);
     
 }
 
@@ -173,8 +201,6 @@ char readByteFromRAM (uint16_t _adress) {
   
   digitalWrite (OE, LOW);    // Enabling output
   
-  delayMicroseconds (1);
-  
   // Reading data pins:
   
   boolean __bbuffer;
@@ -193,90 +219,6 @@ char readByteFromRAM (uint16_t _adress) {
   return (__output_char);
   
 }
-
-//----------------------------------------------------------------------
-
-// Function for entering start adress, if nothing was entered, it start's at 0 or
-//  the last end adress:
-
-uint16_t _startAdress;
-
-void setStartAdress (uint16_t _adress) {
-  
-  uint16_t _b_adress = _adress;
-  
-  _b_adress &= 0xF800;    // Setting lower 10 bits zero, checking if adress is valid
-   
-  if (_b_adress > 0) {
-    
-    Serial.print ("Error: adress is invalid (too long): 0x");
-    Serial.print (_adress, HEX);
-    Serial.println ("  ::writing(movs) progress interrupted");
-    
-    return;
-    
-  }
-  
-  _startAdress = _adress;
-  
-}
-
-//----------------------------------------------------------------------
-
-// Function to write more than one byte to the RAM. The start adress has to be entered,
-//  than its always added by 1. A char array has to be entered. Returnd you get the
-//  las written adress+1:
-
-int writeArrayToRAM (char _data[]) {
-  
-  size_t __array_size = sizeof (_data);    // Getting size of the array for loop
-  uint16_t __current_adress = _startAdress;
-  uint16_t __data_counter = 0;
-  
-  for ( ;__data_counter < __array_size;) {    // For size of array
-  
-    uint16_t _b_adress = __current_adress;
-  
-    _b_adress &= 0xF800;    // Setting lower 10 bits zero, checking if adress is valid
-   
-    if (_b_adress > 0) {
-    
-      Serial.print ("Error: adress is invalid (too long): 0x");
-      Serial.print (__current_adress, HEX);
-      Serial.println ("  ::array writing(movs) progress interrupted");
-    
-      return (0xFFFF);
-    
-    }
-  
-    writeByteToRAM (_startAdress, _data[__data_counter]);
-  
-    __current_adress++;    // increment adress
-    __data_counter++;
-  
-    if (_startAdress > 0x07FF) {
-    
-      Serial.print ("Warning: last adress was filled: 0x");
-      Serial.print (__current_adress-1, HEX);
-      Serial.println ("  ::array writing(movs) will be interrupted");
-    
-    }
-    
-  }
-  
-  return (_startAdress);
-  
-}
-
-//----------------------------------------------------------------------
-
-// Function to read larger parts of the 
-
-//int readArrayFromRAM (char _data
-
-
-//----------------------------------------------------------------------
-
 void setup () {
   
   Serial.begin (9600);    // Bus transfer rate
@@ -299,10 +241,14 @@ void setup () {
 
 void loop () {
   
+  int adress = 0x015F;    // Random adress
+  char data = 'A';        // Random data
   
-    
+  writeByteToRAM (adress, data);
   
-  delay (0.0001);
+  Serial.println (readByteFromRAM (adress));    // Output of character at adress, in this case 'A'
+  
+  delay (100);    // Arduino has to transmit serial buffer
   exit (0);
   
 }
