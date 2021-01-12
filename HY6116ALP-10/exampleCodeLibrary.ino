@@ -1,34 +1,8 @@
-/*
-MIT License
 
-Copyright (c) 2020 Benedikt Bursian
+#include <stdio.h>
+#include <cmos.h>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-
-
-/*
-*
-*/
-
-#define Ad0 47    // Adress pins (example pins)
+#define Ad0 47    // Adress pins
 #define Ad1 45
 #define Ad2 43
 #define Ad3 41
@@ -40,7 +14,9 @@ SOFTWARE.
 #define Ad9 34
 #define Ad10 40
 
-#define IO1 49    // Input- / Output- pins (example pins)
+
+
+#define IO1 49    // Input- / Output- pins
 #define IO2 51
 #define IO3 53
 #define IO4 52
@@ -49,7 +25,28 @@ SOFTWARE.
 #define IO7 46
 #define IO8 44
 
-#define OE 38    // Output Enable / Write Enable (example pins)
+
+
+#define OE 38    // Output Enable / Write Enable
 #define WE 36
 
-#define maxSize 0x07FF    // Maximum Size of memory (example pins)
+#define maxSize 0x07FF    // Maximum Size of memory
+//#define maxSizeInv 0xFFFF-maxSize
+
+cmos cmosRam ();
+
+void setup () {
+  
+  Serial.begin (9600);
+  
+}
+
+void loop () {
+  
+  cmosRam.writeByteToRAM (0x001F, 'a');
+  Serial.println (cmosRam.readByteFromRAM (0x001F));
+  
+  delay (100);
+  exit (0);
+  
+}
