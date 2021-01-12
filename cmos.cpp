@@ -29,21 +29,26 @@ SOFTWARE.
 // Constructor:
 cmos::cmos () {
 
-    if (adError != 0) {
+    if (adError != 0) {     // Error with adress pins
 
         l__output.println ("Error: adress pin(s) not defined");
         return;
 
     }
-    if (ioError != 0) {
+    if (ioError != 0) {     // Error with io pins
 
         l__output.println ("Error: io pin(s) not defined");
         return;
 
     }
-    if (siError != 0) {
+    if (siError != 0) {     // Error with given size of ram module
 
-        l__output.println ("Error: ");
+        l__output.println ("Error: size not defined");
+
+    }
+    if (owError != 0) {
+
+        l__output.println ("Error: OE or WE pin(s) not defined");
 
     }
 
