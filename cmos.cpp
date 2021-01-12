@@ -44,11 +44,13 @@ cmos::cmos () {
     if (siError != 0) {     // Error with given size of ram module
 
         l__output.println ("Error: size not defined");
+        return;
 
     }
     if (owError != 0) {
 
         l__output.println ("Error: OE or WE pin(s) not defined");
+        return;
 
     }
 
