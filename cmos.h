@@ -27,10 +27,18 @@ SOFTWARE.
 #include "Arduino.h"
 
 
+#define SERIAL_BAUD 9600        // Standard serial baud rate
+
+
 #ifndef OUT_TYPE
     #define OUT_TYPE "Serial"      // Standard output
 #endif
 
+#ifndef SERIAL
+    #define S_DEF 0
+#else
+    #define S_DEF 1
+#endif
 
 
 class cmos {
@@ -51,6 +59,9 @@ class cmos {
 
         int __OE;
         int __WE;
+
+        uint16_t __maxSize;
+        uint16_t __maxSizeInv;
 
 };
 
