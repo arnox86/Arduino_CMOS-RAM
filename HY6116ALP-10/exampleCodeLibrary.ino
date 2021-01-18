@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <cmos.h>
 
+// Example: pin assignments for Arduino Mega 2560 R3:
+
 #define Ad0 47    // Adress pins
 #define Ad1 45
 #define Ad2 43
@@ -30,10 +32,13 @@
 #define OE 38    // Output Enable / Write Enable
 #define WE 36
 
-#define maxSize 0x07FF    // Maximum Size of memory
-//#define maxSizeInv 0xFFFF-maxSize
 
-cmos cmosRam ();
+// Putting all pin assignments into the arrays:
+int _adress_bit[11] = {Ad0, Ad1, Ad2, Ad3, Ad4, Ad5, Ad6, Ad7, Ad8, Ad9, Ad10};
+int _io_bit[8] = {IO1, IO2, IO3, IO4, IO5, IO6, IO7, IO8};
+
+#define maxSize 0x07FF    // Maximum Size of memory
+
 
 void setup () {
   
@@ -41,12 +46,18 @@ void setup () {
   
 }
 
+// Calling constructor:
+cmos cmosRam (_adress_bit, _io_bit, OE, WE, maxSize);
+
 void loop () {
   
-  cmosRam.writeByteToRAM (0x001F, 'a');
-  Serial.println (cmosRam.readByteFromRAM (0x001F));
+  // Writeing character 'a' to position 0x014F at RAM:
+  cmosRam.writeByteToRAM (0x014F, 'a');
   
-  delay (100);
+  // Reading and giving out the written character:
+  Serial.println (cmosRam.readByteFromRAM (0x014F));
+  
+  delay (100);    // Let time to clear serial buffer
   exit (0);
   
 }
