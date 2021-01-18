@@ -1,7 +1,8 @@
 
 cmos.h:
 
-  cmos /name/ (int /array with adress pins [11]/, int /array with io pins [8]/, int /oe pin assignment/, int /we pin assignment/, int /size (number of bytes)/);
+  cmos /name/ (int /array with adress pins [11]/, int /array with io pins [8]/, int /oe pin assignment/, int /we pin assignment/, 
+                    int /size (number of bytes)/);
   
             // Arrays have to be filled with the pin numbers at arduino.
             // The arduino pin connected to io0 / ad0 at the RAM have to be at position [0] in the arrays
