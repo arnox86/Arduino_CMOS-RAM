@@ -27,46 +27,40 @@ SOFTWARE.
 
 
 // Constructor:
-cmos::cmos () {
+cmos::cmos (int adressArray[], int ioArray[], int oePin, int wePin, int size) {
 
-    if (adError != 0) {     // Error with adress pins
+    if (!S_DEF) {
 
-        l__output.println ("Error: adress pin(s) not defined");
-        return;
-
-    }
-    if (ioError != 0) {     // Error with io pins
-
-        l__output.println ("Error: io pin(s) not defined");
-        return;
-
-    }
-    if (siError != 0) {     // Error with given size of ram module
-
-        l__output.println ("Error: size not defined");
-        return;
-
-    }
-    if (owError != 0) {
-
-        l__output.println ("Error: OE or WE pin(s) not defined");
-        return;
+        Serial.begin (SERIAL_BAUD);
 
     }
 
 
+    for (int __adst_cnt = 0; __adst_cnt < 11; __adst_cnt++) {
 
-    _adress_bit = {Ad0, Ad1, Ad2, Ad3, Ad4, Ad5, Ad6, Ad7, Ad8, Ad9, Ad10};
-    _io_bit = {0, IO1, IO2, IO3, IO4, IO5, IO6, IO7, IO8};
+        _adress_bit[__adst_cnt] = adressArray[__adst_cnt];
 
-    for (int __adout_cnt = 0; __adou_cnt < 11; __adout_cnt++) {
+    }
+    for (int __iost_cnt = 0; __iost_cnt < 8; __iost_cnt++) {
+
+        _io_bit[__iost_cnt+1] = ioArray[__iost_cnt];
+
+    }
+
+    for (int __adout_cnt = 0; __adout_cnt < 11; __adout_cnt++) {
 
         pinMode (_adress_bit[__adout_cnt], OUTPUT);
 
     }
 
-    pinMode (OE, OUTPUT);
-    pinMode (WE, OUTPUT);
+    __OE = oePin;
+    __WE = wePin;
+
+    pinMode (__OE, OUTPUT);
+    pinMode (__WE, OUTPUT);
+
+    __maxSize = size;
+    __maxSizeInv = 0xFFFF - size;
 
 }
 
@@ -77,15 +71,15 @@ boolean cmos::adressValidation (uint16_t _adress, String _process) {
 
     uint16_t _b_adress = _adress;
 
-    _b_adress &= 0xF800;    // Setting not needed bits high, checking if adress is valid
+    _b_adress &= __maxSizeInv;    // Setting not needed bits high, checking if adress is valid
 
     if (_b_adress > 0) {
     
-        l__output.print ("Error: adress is invalid (too long): 0x");
-        l__output.print (_adress, HEX);
-        l__output.print ("  ::");
-        l__output.print (_process);        // Entering sort of executed process
-        l__output.println (" progress interrupted");
+        /*OUT_TYPE.print ("Error: adress is invalid (too long): 0x");
+        OUT_TYPE.print (_adress, HEX);
+        OUT_TYPE.print ("  ::");
+        OUT_TYPE.print (_process);        // Entering sort of executed process
+        OUT_TYPE.println (" progress interrupted");*/
     
         return (1);
     
@@ -114,7 +108,7 @@ void cmos::writeByteToRAM (uint16_t __adress, char __data) {
 
     // Checking adress:
 
-    if (adressValidation (__adress, "writing") return;
+    if (adressValidation (__adress, "writing")) return;
     
     // Setting io pins as output:
     
@@ -131,8 +125,8 @@ void cmos::writeByteToRAM (uint16_t __adress, char __data) {
 
     // Setting OE and WE pins:
 
-    digitalWrite (OE, HIGH);
-    digitalWrite (WE, LOW);
+    digitalWrite (__OE, HIGH);
+    digitalWrite (__WE, LOW);
 
     // Setting data pins:
 
@@ -146,18 +140,18 @@ void cmos::writeByteToRAM (uint16_t __adress, char __data) {
 
     }
 
-    digitalWrite (WE, HIGH)     // Ending write cycle by resetting WE
+    digitalWrite (__WE, HIGH);     // Ending write cycle by resetting WE
 
     // Setting data pins to LOW:
 
     for (int __dlow_cnt = 0; __dlow_cnt < 8; __dlow_cnt++) {
 
-        digitalWrite (_io_pin[__dlow_cnt], LOW);
+        digitalWrite (_io_bit[__dlow_cnt], LOW);
     
     }
 
     // Time buffer (exper.):
-    //delayMicroseconds (1);
+    delayMicroseconds (1);
 
 }
 
@@ -166,7 +160,7 @@ char cmos::readByteFromRAM (uint16_t __adress) {
     byte __output_char = 0;     // Buffer for final return value
     uint16_t __b_adress = __adress;     // Adress buffer
 
-    if (adressValidation (__adress, "reading") return (0);
+    if (adressValidation (__adress, "reading")) return (0);
 
     // Set data pins to input:
 
@@ -183,7 +177,7 @@ char cmos::readByteFromRAM (uint16_t __adress) {
 
     // Setting OE, WE not critical
     
-    digitalWrite (OE, LOW);
+    digitalWrite (__OE, LOW);
 
     // Reading data bits:
 
@@ -194,7 +188,7 @@ char cmos::readByteFromRAM (uint16_t __adress) {
 
         __bbuffer = digitalRead (_io_bit[__drd_cnt+1]);     // Reading single pins
 
-        if (__bbufer == 1) bitSet (__andbuffer, __drd_cnt);     // Setting bits in bufffer
+        if (__bbuffer == 1) bitSet (__andbuffer, __drd_cnt);     // Setting bits in buffer
         __output_char += __andbuffer;       // Adding values to output buffer
         __andbuffer = 0;
 
