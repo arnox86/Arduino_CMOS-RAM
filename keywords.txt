@@ -1,0 +1,14 @@
+
+cmos.h:
+
+  cmos /name/ (int /array with adress pins [11]/, int /array with io pins [8]/, int /oe pin assignment/, int /we pin assignment/, int /size (number of bytes)/);
+  
+            // Arrays have to be filled with the pin numbers at arduino.
+            // The arduino pin connected to io0 / ad0 at the RAM have to be at position [0] in the arrays
+           
+            // Size can be up to 0x07FF, else more adress pins would be needed
+  
+  .writeByteToRAM (/adress (byte)/, /data (char)/);
+  char .readByteFromRAM (/adress (byte)/);
+
+            // Address must be lower or equal the size of the RAM, else it won't work
