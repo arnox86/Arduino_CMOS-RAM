@@ -29,13 +29,7 @@ SOFTWARE.
 // Constructor:
 cmos::cmos (int adressArray[], int ioArray[], int oePin, int wePin, int size) {
 
-    if (!S_DEF) {
-
-        Serial.begin (SERIAL_BAUD);
-
-    }
-
-
+    
     for (int __adst_cnt = 0; __adst_cnt < 11; __adst_cnt++) {
 
         _adress_bit[__adst_cnt] = adressArray[__adst_cnt];
@@ -73,13 +67,7 @@ boolean cmos::adressValidation (uint16_t _adress, String _process) {
 
     _b_adress &= __maxSizeInv;    // Setting not needed bits high, checking if adress is valid
 
-    if (_b_adress > 0) {
-    
-        /*OUT_TYPE.print ("Error: adress is invalid (too long): 0x");
-        OUT_TYPE.print (_adress, HEX);
-        OUT_TYPE.print ("  ::");
-        OUT_TYPE.print (_process);        // Entering sort of executed process
-        OUT_TYPE.println (" progress interrupted");*/
+    if (_b_adress > 0) {        // Error
     
         return (1);
     
