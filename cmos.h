@@ -27,10 +27,10 @@ SOFTWARE.
 #include "Arduino.h"
 
 
-#define SERIAL_BAUD 9600        // Standard serial baud rate
+// #define SERIAL_BAUD 9600        // Standard serial baud rate
 
 
-#ifndef OUT_TYPE
+/*#ifndef OUT_TYPE
     #define OUT_TYPE "Serial"      // Standard output
 #endif
 
@@ -38,7 +38,7 @@ SOFTWARE.
     #define S_DEF 0
 #else
     #define S_DEF 1
-#endif
+#endif*/        // Not used yet
 
 
 class cmos {
